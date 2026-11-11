@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Recycle Rush</title>
-<script type="text/javascript" nonce="5101a9cbc2ce4122985acaa61fd" src="//local.adguard.org?ts=1794321108590&amp;type=content-script&amp;dmn=d8dedb5f-c2c9-4b80-baca-d2e01cdff629.frame.claudeusercontent.com&amp;url=https%3A%2F%2Fd8dedb5f-c2c9-4b80-baca-d2e01cdff629.frame.claudeusercontent.com%2F_f%2F1794321776-b9d9%2F_src%2Findex.html%3F__frame_t%3DPrY3BQlbnoOd5jy2A987re2m.c7e55bb6-7f40-4f03-88c2-6d701b27c7ad.63fb247f-783d-4715-8d46-6bca64b94cfd.1794325378&amp;app=chrome.exe&amp;css=3&amp;js=1&amp;rel=1&amp;rji=1&amp;sbe=1"></script><script type="text/javascript" nonce="5101a9cbc2ce4122985acaa61fd" src="//local.adguard.org?ts=1794321108590&amp;name=AdGuard%20Assistant&amp;name=AdGuard%20Extra&amp;name=AdGuard%20Popup%20Blocker&amp;type=user-script"></script><link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&display=swap" rel="stylesheet">
 <style>
 :root{--ink:#1b1f3b;--blue:#2f7df6;--orange:#ff8a1f;--brown:#8a5a2b;--gold:#ffc81e;--green:#38c85a;--red:#ef4a4a;
@@ -81,6 +81,16 @@ input{font:700 24px var(--font);width:100%;max-width:340px;text-align:center;pad
 .empty{padding:22px;color:#fff}
 .conf{position:fixed;z-index:70;top:-20px;width:10px;height:14px;pointer-events:none;animation:fall linear forwards}
 @keyframes fall{to{transform:translateY(105vh) rotate(720deg)}}
+.btn.sm{font-size:16px;padding:6px 14px;box-shadow:0 5px 0 var(--ink);margin:4px}
+.adminBtn{position:fixed;right:6px;bottom:calc(4px + env(safe-area-inset-bottom,0px));z-index:20;font-size:14px;opacity:.2;background:none;border:0;cursor:pointer;color:var(--ink);padding:6px}
+.adminBtn:hover,.adminBtn:focus-visible{opacity:.8}
+.modal{position:fixed;inset:0;z-index:100;background:rgba(27,31,59,.6);display:none;align-items:center;justify-content:center;padding:14px}
+.modal.on{display:flex}
+.modal .panel{max-width:420px;max-height:90vh;overflow:auto}
+.arow{display:flex;gap:8px;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:2px solid #dde;text-align:left;font-size:17px}
+.arow{flex-wrap:wrap;justify-content:center}
+.ain{font:700 16px var(--font);width:130px;max-width:none;padding:4px 6px;border:3px solid var(--ink);border-radius:8px;box-shadow:none}
+.ain.sc{width:80px}
 @media (max-width:420px){.items{grid-template-columns:repeat(4,1fr)}.row{font-size:15px}.btn{font-size:19px;padding:10px 18px}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.conf{display:none}}
 </style>
@@ -91,14 +101,24 @@ input{font:700 24px var(--font);width:100%;max-width:340px;text-align:center;pad
 <div class="hud" id="hud"><div class="pill"><span class="coin"></span><span id="score">0</span></div><div class="pill">⏱ <span id="timer">0.0</span>s</div></div>
 
 <!-- 1. Username -->
-<section class="screen on" id="s-name">
- <h1>RECYCLE RUSH</h1>
+<section class="screen on" id="s-home">
+ <h1 style="margin-top:6vh">RECYCLE RUSH</h1>
  <div class="panel">
   <p style="font-size:20px;margin-top:0">Sort 10 items into the right bins!</p>
+  <button class="btn" id="homePlay">PLAY</button><br>
+  <button class="btn alt" id="lbHome">LEADERBOARD</button>
+ </div>
+</section>
+
+<!-- 1b. Username -->
+<section class="screen" id="s-name">
+ <h1>WHO’S PLAYING?</h1>
+ <div class="panel">
+  <p style="font-size:20px;margin-top:0">Pick a username to start!</p>
   <input id="uname" maxlength="16" autocomplete="off" placeholder="Your username" aria-label="Username">
   <div class="err" id="uerr" role="alert"></div>
-  <button class="btn" id="play">PLAY</button>
-  <button class="btn alt" id="lb1">LEADERBOARD</button>
+  <button class="btn" id="play">START</button>
+  <button class="btn alt" id="backName">BACK</button>
   <div class="cap">3–16 letters, numbers or underscores</div>
  </div>
 </section>
@@ -120,11 +140,13 @@ input{font:700 24px var(--font);width:100%;max-width:340px;text-align:center;pad
    <div class="stat"><span>Final score</span><b id="rScore">0</b></div>
    <div class="stat"><span>Correct</span><b id="rCorrect">0/10</b></div>
    <div class="stat"><span>Time</span><b id="rTime">0s</b></div>
-   <div class="stat"><span>Time bonus</span><b id="rBonus">+0</b></div>
+   <div class="stat"><span>Perfect bonus</span><b id="rBonus">+0</b></div>
   </div>
   <div class="rank" id="rRank"></div>
   <button class="btn" id="again">PLAY AGAIN</button>
+  <button class="btn alt" id="next">NEXT PLAYER</button><br>
   <button class="btn alt" id="lb2">LEADERBOARD</button>
+  <button class="btn alt" id="home">HOME</button>
  </div>
 </section>
 
@@ -135,6 +157,27 @@ input{font:700 24px var(--font);width:100%;max-width:340px;text-align:center;pad
  <button class="btn" id="back">BACK</button>
  <div class="cap" id="bcap"></div>
 </section>
+
+<!-- Admin: small corner button + password-protected panel -->
+<button class="adminBtn" id="adminBtn" aria-label="Admin">⚙</button>
+<div class="modal" id="adm">
+ <div class="panel">
+  <div id="admLogin">
+   <h2 style="font-size:28px">ADMIN</h2>
+   <input id="admPw" type="password" placeholder="Password" autocomplete="off" aria-label="Admin password">
+   <div class="err" id="admErr" role="alert"></div>
+   <button class="btn sm" id="admGo">ENTER</button>
+   <button class="btn sm alt" id="admX1">CLOSE</button>
+  </div>
+  <div id="admPanel" style="display:none">
+   <h2 style="font-size:28px">ADMIN PANEL</h2>
+   <div id="admList"></div>
+   <button class="btn sm" id="admClear" style="background:linear-gradient(#ff9a9a 0 45%,var(--red) 46%)">CLEAR ALL SCORES</button>
+   <button class="btn sm alt" id="admX2">CLOSE</button>
+   <div class="cap" id="admCap"></div>
+  </div>
+ </div>
+</div>
 
 <script>
 (function(){
@@ -153,7 +196,8 @@ var ITEMS=[
  {n:"Wine bottle",e:"🍷",b:"brown",h:"Glass bottles go in the brown bin!"},
  {n:"Drinking glass",e:"🥛",b:"brown",h:"Glass goes in the brown bin!"}
 ];
-var S={name:"",score:0,correct:0,t0:0,tick:null,sel:null,prev:"s-name",items:[]};
+// State: totalScore, currentStreak, mistakeCount (perfect bonus = mistakeCount===0)
+var S={name:"",totalScore:0,currentStreak:0,mistakeCount:0,correct:0,t0:0,tick:null,sel:null,prev:"s-name",items:[]};
 var memStore={}, reduce=matchMedia("(prefers-reduced-motion:reduce)").matches;
 
 /* ---- storage: shared -> localStorage -> memory ---- */
@@ -187,6 +231,7 @@ function sortBoard(a){return a.sort(function(x,y){return y.score-x.score||x.time
 function show(id){
  document.querySelectorAll(".screen").forEach(function(s){s.classList.toggle("on",s.id===id)});
  var g=id==="s-game";$("#hud").classList.toggle("on",g);$("#xp").classList.toggle("on",g);
+ $("#adminBtn").style.display=g?"none":"block";
  scrollTo(0,0);
 }
 
@@ -200,7 +245,7 @@ function start(){
 /* ---- game ---- */
 function shuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t}return a}
 function newRound(){
- S.score=0;S.correct=0;S.sel=null;S.items=shuffle(ITEMS.map(function(x,i){x.id=i;return x}).slice());
+ S.totalScore=0;S.currentStreak=0;S.mistakeCount=0;S.correct=0;S.sel=null;S.items=shuffle(ITEMS.map(function(x,i){x.id=i;return x}).slice());
  $("#score").textContent=0;$("#xpbar").style.width="0";$("#hint").classList.remove("show");
  var box=$("#items");box.innerHTML="";
  S.items.forEach(function(it){
@@ -214,9 +259,9 @@ function buildBins(){
  var box=$("#bins");
  Object.keys(BINS).forEach(function(k){
   var d=document.createElement("div");d.className="bin "+k;d.dataset.bin=k;d.setAttribute("role","button");d.tabIndex=0;
-  d.innerHTML="<b>"+BINS[k].icon+"</b>"+BINS[k].label.replace(" / ","<small>")+(k==="orange"?"</small>":"");
-  d.addEventListener("click",function(){if(S.sel!==null)sort(S.sel,k)});
-  d.addEventListener("keydown",function(e){if((e.key==="Enter"||e.key===" ")&&S.sel!==null){e.preventDefault();sort(S.sel,k)}});
+  d.innerHTML="<b>"+BINS[k].icon+"</b>"+BINS[k].label;
+  d.addEventListener("click",function(){if(S.sel!==null)onItemDropped(S.sel,k)});
+  d.addEventListener("keydown",function(e){if((e.key==="Enter"||e.key===" ")&&S.sel!==null){e.preventDefault();onItemDropped(S.sel,k)}});
   box.appendChild(d);
  });
 }
@@ -237,7 +282,7 @@ function wire(el,it){
    document.querySelectorAll(".bin").forEach(function(x){x.classList.remove("over")});
    if(!moved){select(it.id);return}
    var b=binAt(ev.clientX,ev.clientY);ghost.remove();el.classList.remove("drag");
-   if(b&&ev.type==="pointerup")sort(it.id,b.dataset.bin);
+   if(b&&ev.type==="pointerup")onItemDropped(it.id,b.dataset.bin);
   }
   el.addEventListener("pointermove",mv);el.addEventListener("pointerup",up);el.addEventListener("pointercancel",up);
  });
@@ -252,33 +297,42 @@ function pop(el,txt,col){
  var r=el.getBoundingClientRect(),p=document.createElement("div");p.className="pop";p.textContent=txt;if(col)p.style.color=col;
  p.style.left=(r.left+r.width/2-30)+"px";p.style.top=(r.top-10)+"px";document.body.appendChild(p);setTimeout(function(){p.remove()},950);
 }
-function sort(id,bin){
+/* Streak ladder: 1st=10, 2nd=15, 3rd=20, 4th and beyond=25 (max cap) */
+function pointsForStreak(n){return Math.min(10+(n-1)*5,25)}
+
+/* onItemDropped(item, targetBin): runs once per drop (drag or tap).
+   Correct -> streak+1, award pointsForStreak(streak).
+   Wrong   -> -5 (never below 0), streak reset to 0, mistakeCount+1. */
+function onItemDropped(id,bin){
  var it=ITEMS[id],binEl=document.querySelector('.bin[data-bin="'+bin+'"]'),hint=$("#hint");
  if(it.b===bin){
-  S.score+=100;S.correct++;S.sel=null;anim(binEl,"bounce");pop(binEl,"+100 🪙");
+  S.currentStreak++;var pts=pointsForStreak(S.currentStreak);S.totalScore+=pts;S.correct++;S.sel=null;
+  anim(binEl,"bounce");pop(binEl,"+"+pts+(S.currentStreak>1?" 🔥x"+S.currentStreak:" 🪙"));
   var el=document.querySelector('.item[data-id="'+id+'"]');if(el)el.remove();
   hint.classList.remove("show");$("#xpbar").style.width=S.correct*10+"%";
-  if(S.correct===10)finish();
+  if(S.correct===10)onRoundComplete();
  }else{
-  S.score=Math.max(0,S.score-25);anim(binEl,"shake");pop(binEl,"-25","#ff8a8a");
+  S.totalScore=Math.max(0,S.totalScore-5);S.currentStreak=0;S.mistakeCount++;
+  anim(binEl,"shake");pop(binEl,"-5","#ff8a8a");
   hint.textContent="💡 "+it.h;hint.classList.add("show");select(S.sel);S.sel=null;
   document.querySelectorAll(".item").forEach(function(i){i.classList.remove("sel")});
  }
- $("#score").textContent=S.score;
+ $("#score").textContent=S.totalScore;
 }
-async function finish(){
+/* onRoundComplete(): all 10 sorted. Adds the flat +50 Perfect Sweep bonus
+   when mistakeCount is 0, then saves the final score to the leaderboard. */
+async function onRoundComplete(){
  clearInterval(S.tick);
  var ms=performance.now()-S.t0,sec=ms/1000;
- // bonus: full 200 at 20s or less, fading to 0 at 100s
- var bonus=Math.round(Math.max(0,Math.min(200,200*(1-(sec-20)/80))));
- S.score+=bonus;$("#score").textContent=S.score;
+ var bonus=S.mistakeCount===0?50:0; // Perfect Sweep
+ S.totalScore+=bonus;$("#score").textContent=S.totalScore;
  var board=await load(),key=S.name.toLowerCase(),ex=board.filter(function(e){return e.name.toLowerCase()===key})[0];
  // same username keeps only best run
- if(!ex)board.push({name:S.name,score:S.score,time:ms});
- else if(S.score>ex.score||(S.score===ex.score&&ms<ex.time)){ex.name=S.name;ex.score=S.score;ex.time=ms}
+ if(!ex)board.push({name:S.name,score:S.totalScore,time:ms});
+ else if(S.totalScore>ex.score||(S.totalScore===ex.score&&ms<ex.time)){ex.name=S.name;ex.score=S.totalScore;ex.time=ms}
  sortBoard(board);board=board.slice(0,10);await save(board);
  var pos=board.findIndex(function(e){return e.name.toLowerCase()===key});
- $("#rScore").textContent=S.score;$("#rCorrect").textContent="10/10";$("#rTime").textContent=sec.toFixed(1)+"s";$("#rBonus").textContent="+"+bonus;
+ $("#rScore").textContent=S.totalScore;$("#rCorrect").textContent="10/10";$("#rTime").textContent=sec.toFixed(1)+"s";$("#rBonus").textContent="+"+bonus;
  $("#rRank").textContent=pos>=0?"🏆 Your best rank: #"+(pos+1):"Not in the top 10 yet – try again!";
  show("s-result");confetti();
 }
@@ -308,13 +362,59 @@ async function board(from){
 
 /* ---- wiring ---- */
 buildBins();
-$("#uname").value=getLast();
+// fresh name field for each new player
+function toName(){$("#uname").value="";$("#uerr").textContent="";show("s-name");$("#uname").focus()}
+$("#homePlay").onclick=toName;
+$("#lbHome").onclick=function(){board("s-home")};
+$("#backName").onclick=function(){show("s-home")};
 $("#play").onclick=start;
 $("#uname").addEventListener("keydown",function(e){if(e.key==="Enter")start()});
-$("#lb1").onclick=function(){board("s-name")};
 $("#lb2").onclick=function(){board("s-result")};
-$("#again").onclick=newRound;
+$("#again").onclick=newRound;       // same player, new round
+$("#next").onclick=toName;           // next player, new username
+$("#home").onclick=function(){S.name="";show("s-home")};
 $("#back").onclick=function(){show(S.prev)};
+
+/* ---- admin panel (password is checked in the page, so it is a light lock only) ---- */
+var ADMIN_PW="12345",armed=false;
+function admClose(){$("#adm").classList.remove("on")}
+async function admList(){
+ var data=sortBoard(await load()),box=$("#admList");box.innerHTML="";armed=false;$("#admClear").textContent="CLEAR ALL SCORES";
+ if(!data.length)box.innerHTML='<div class="cap">No scores yet.</div>';
+ data.forEach(function(e){
+  var r=document.createElement("div");r.className="arow";
+  var nm=document.createElement("input"),sc=document.createElement("input"),sv=document.createElement("button");
+  nm.value=e.name;nm.maxLength=16;nm.className="ain";nm.setAttribute("aria-label","Name");
+  sc.type="number";sc.min=0;sc.value=e.score;sc.className="ain sc";sc.setAttribute("aria-label","Score");
+  sv.className="btn sm";sv.textContent="SAVE";
+  // edit a player's name and/or score
+  sv.onclick=async function(){
+   var n=nm.value.trim(),s=Math.floor(Number(sc.value));
+   if(!/^\w{3,16}$/.test(n)){$("#admCap").textContent="Name: 3–16 letters, numbers or underscores.";return}
+   if(!isFinite(s)||s<0){$("#admCap").textContent="Score must be 0 or more.";return}
+   var all=await load();
+   if(all.some(function(x){return x.name!==e.name&&x.name.toLowerCase()===n.toLowerCase()})){$("#admCap").textContent="That name is already on the board.";return}
+   all.forEach(function(x){if(x.name===e.name){x.name=n;x.score=s}});
+   await save(sortBoard(all).slice(0,10));admList();
+  };
+  var b=document.createElement("button");b.className="btn sm";b.textContent="DELETE";b.style.background="linear-gradient(#ff9a9a 0 45%,var(--red) 46%)";
+  b.onclick=async function(){var all=await load();await save(all.filter(function(x){return x.name!==e.name}));admList()};
+  r.appendChild(nm);r.appendChild(sc);r.appendChild(sv);r.appendChild(b);box.appendChild(r);
+ });
+ $("#admCap").textContent=mode()==="shared"?"Board: shared with all players":"Board: this device only";
+}
+$("#adminBtn").onclick=function(){$("#admLogin").style.display="block";$("#admPanel").style.display="none";$("#admPw").value="";$("#admErr").textContent="";$("#adm").classList.add("on");$("#admPw").focus()};
+function admTry(){
+ if($("#admPw").value===ADMIN_PW){$("#admLogin").style.display="none";$("#admPanel").style.display="block";admList()}
+ else $("#admErr").textContent="Wrong password.";
+}
+$("#admGo").onclick=admTry;
+$("#admPw").addEventListener("keydown",function(e){if(e.key==="Enter")admTry()});
+$("#admX1").onclick=admClose;$("#admX2").onclick=admClose;
+$("#admClear").onclick=async function(){
+ if(!armed){armed=true;this.textContent="TAP AGAIN TO CONFIRM";return}
+ await save([]);admList();
+};
 })();
 </script>
 </body>
