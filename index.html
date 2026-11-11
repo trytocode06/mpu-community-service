@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Recycle Rush</title>
+<title>Bin It Right!</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&display=swap" rel="stylesheet">
 <style>
@@ -54,14 +54,17 @@ input{font:700 24px var(--font);width:100%;max-width:340px;text-align:center;pad
 .item.sel{background:#fff3b0;transform:translateY(-4px);box-shadow:0 9px 0 var(--ink)}
 .item.drag{opacity:.35}
 .ghost{position:fixed;z-index:50;pointer-events:none;width:80px;transform:translate(-50%,-50%) scale(1.15) rotate(-5deg)}
-.bins{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.bin{cursor:pointer;color:#fff;border:5px solid var(--ink);border-radius:16px;box-shadow:0 8px 0 var(--ink);padding:10px 4px 12px;text-align:center;text-shadow:0 2px 0 rgba(0,0,0,.4);font-weight:700;font-size:clamp(14px,4vw,20px);position:relative}
-.bin b{display:block;font-size:clamp(34px,10vw,54px);font-weight:400;text-shadow:none}
-.bin small{display:block;font-size:.65em;opacity:.9}
-.bin.blue{background:linear-gradient(#7db2ff 0 30%,var(--blue) 31%)}
-.bin.orange{background:linear-gradient(#ffc27a 0 30%,var(--orange) 31%)}
-.bin.brown{background:linear-gradient(#c28f58 0 30%,var(--brown) 31%)}
-.bin.over{outline:5px solid var(--gold)}
+.bins{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+/* bins are drawn as SVG bin shapes (lid, handle, tapered body) with a label plate */
+.bin{cursor:pointer;text-align:center;font-weight:700;color:var(--ink);font-size:clamp(11px,3.3vw,18px);line-height:1.1;position:relative}
+.bin svg{display:block;width:100%;max-width:130px;margin:0 auto;overflow:visible}
+.bin span{display:block;margin-top:6px;background:#fff;border:3px solid var(--ink);border-radius:10px;padding:2px 4px;box-shadow:0 3px 0 var(--ink)}
+
+.item b svg{display:block;margin:0 auto;height:clamp(32px,8vw,46px);width:auto}
+
+
+
+.bin.over{transform:scale(1.08);filter:drop-shadow(0 0 8px var(--gold))}
 .bounce{animation:bounce .5s}.shake{animation:shake .45s}
 @keyframes bounce{30%{transform:translateY(-18px) scale(1.06)}60%{transform:translateY(0) scale(.97)}}
 @keyframes shake{20%,60%{transform:translateX(-10px)}40%,80%{transform:translateX(10px)}}
@@ -102,7 +105,7 @@ input{font:700 24px var(--font);width:100%;max-width:340px;text-align:center;pad
 
 <!-- 1. Username -->
 <section class="screen on" id="s-home">
- <h1 style="margin-top:6vh">RECYCLE RUSH</h1>
+ <h1 style="margin-top:6vh">BIN IT RIGHT!</h1>
  <div class="panel">
   <p style="font-size:20px;margin-top:0">Sort 10 items into the right bins!</p>
   <button class="btn" id="homePlay">PLAY</button><br>
@@ -183,18 +186,36 @@ input{font:700 24px var(--font);width:100%;max-width:340px;text-align:center;pad
 (function(){
 "use strict";
 var $=function(s){return document.querySelector(s)};
-var BINS={blue:{label:"Paper",icon:"📄"},orange:{label:"Plastic / Aluminium",icon:"🥤"},brown:{label:"Glass",icon:"🍾"}};
+var BINS={
+ blue:{label:"Paper",icon:"📄",col:"#2f7df6",dark:"#1f5fc7"},
+ orange:{label:"Plastic / Aluminium",icon:"🥤",col:"#ff8a1f",dark:"#d46a08"},
+ brown:{label:"Glass",icon:"🍾",col:"#8a5a2b",dark:"#654019"},
+ black:{label:"Non-recyclable",icon:"🚫",col:"#2d2d35",dark:"#15151b"}
+};
+/* draws one bin: handle, lid, tapered body, gloss, and a symbol badge */
+function binSVG(k){
+ var b=BINS[k],o='stroke="#1b1f3b" stroke-width="5" stroke-linejoin="round"';
+ return '<svg viewBox="0 0 100 112" aria-hidden="true">'+
+  '<rect x="38" y="4" width="24" height="13" rx="5" fill="'+b.dark+'" '+o+'/>'+
+  '<path d="M16 32 L84 32 L78 104 Q77.5 108 73 108 L27 108 Q22.5 108 22 104 Z" fill="'+b.col+'" '+o+'/>'+
+  '<path d="M25 40 L75 40 L73 50 L27 50 Z" fill="#fff" opacity=".25"/>'+
+  '<rect x="8" y="14" width="84" height="18" rx="7" fill="'+b.dark+'" '+o+'/>'+
+  '<circle cx="50" cy="72" r="21" fill="#fff" stroke="#1b1f3b" stroke-width="3"/>'+
+  '<text x="50" y="81" text-anchor="middle" font-size="26">'+b.icon+'</text></svg>';
+}
 var ITEMS=[
  {n:"Newspaper",e:"📰",b:"blue",h:"Newspapers are paper – blue bin!"},
  {n:"Cardboard box",e:"📦",b:"blue",h:"Cardboard is paper – blue bin!"},
- {n:"Magazine",e:"📖",b:"blue",h:"Magazines are paper – blue bin!"},
- {n:"Water bottle",e:"💧",b:"orange",h:"Plastic bottles go in the orange bin!"},
+ 
+ {n:"Water bottle",e:'<svg viewBox="0 0 40 64"><rect x="15" y="2" width="10" height="7" rx="2" fill="#2f7df6" stroke="#1b1f3b" stroke-width="2.5"/><path d="M14 9h12v6c6 4 8 8 8 14v28c0 3-2 5-5 5H11c-3 0-5-2-5-5V29c0-6 2-10 8-14z" fill="#bfe8ff" stroke="#1b1f3b" stroke-width="3" stroke-linejoin="round"/><rect x="7.5" y="32" width="25" height="14" fill="#2f7df6" opacity=".55"/></svg>',b:"orange",h:"Plastic bottles go in the orange bin!"},
  {n:"Drink can",e:"🥫",b:"orange",h:"Cans go in the orange bin!"},
- {n:"Yoghurt tub",e:"🥣",b:"orange",h:"Plastic tubs go in the orange bin!"},
+ 
  {n:"Shampoo bottle",e:"🧴",b:"orange",h:"Plastic bottles go in the orange bin!"},
  {n:"Glass jar",e:"🫙",b:"brown",h:"Glass jars go in the brown bin!"},
  {n:"Wine bottle",e:"🍷",b:"brown",h:"Glass bottles go in the brown bin!"},
- {n:"Drinking glass",e:"🥛",b:"brown",h:"Glass goes in the brown bin!"}
+ {n:"Drinking glass",e:"🥛",b:"brown",h:"Glass goes in the brown bin!"},
+ {n:"Styrofoam box",e:"🥡",b:"black",h:"Styrofoam can’t be recycled – black bin!"},
+ {n:"Battery",e:"🔋",b:"black",h:"Batteries aren’t kerbside recyclable – black bin!"}
 ];
 // State: totalScore, currentStreak, mistakeCount (perfect bonus = mistakeCount===0)
 var S={name:"",totalScore:0,currentStreak:0,mistakeCount:0,correct:0,t0:0,tick:null,sel:null,prev:"s-name",items:[]};
@@ -259,7 +280,7 @@ function buildBins(){
  var box=$("#bins");
  Object.keys(BINS).forEach(function(k){
   var d=document.createElement("div");d.className="bin "+k;d.dataset.bin=k;d.setAttribute("role","button");d.tabIndex=0;
-  d.innerHTML="<b>"+BINS[k].icon+"</b>"+BINS[k].label;
+  d.innerHTML=binSVG(k)+"<span>"+BINS[k].label+"</span>";
   d.addEventListener("click",function(){if(S.sel!==null)onItemDropped(S.sel,k)});
   d.addEventListener("keydown",function(e){if((e.key==="Enter"||e.key===" ")&&S.sel!==null){e.preventDefault();onItemDropped(S.sel,k)}});
   box.appendChild(d);
