@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Bin It Right!</title>
+<title>Quiz It Right</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&display=swap" rel="stylesheet">
 <style>
@@ -103,6 +103,42 @@ input{font:700 24px var(--font);width:100%;max-width:340px;text-align:center;pad
 .modal.on{display:flex}.modal .panel{max-width:440px;max-height:90vh;overflow:auto}
 .arow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;justify-content:center;padding:6px 0;border-bottom:2px solid #dde}
 .ain{font:700 16px var(--font);width:130px;max-width:none;padding:4px 6px;border:3px solid var(--ink);border-radius:8px;box-shadow:none}.ain.sc{width:80px}
+/* mode select */
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:16px;width:100%;margin-bottom:12px}
+.mcard{font-family:var(--font);color:var(--ink);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;padding:26px 12px;background:#fff;border:5px solid var(--ink);border-radius:20px;box-shadow:0 8px 0 var(--ink);transition:transform .06s,box-shadow .06s}
+.mcard:hover{transform:translateY(-4px)}.mcard:active{transform:translateY(6px);box-shadow:0 2px 0 var(--ink)}
+.mcard:focus-visible{outline:4px solid var(--gold);outline-offset:2px}
+.mcard b{font-size:clamp(24px,5vw,34px)}.mcard small{font-size:16px;font-weight:500;opacity:.8}.mi{font-size:clamp(48px,10vw,72px)}
+/* Sort It Right: HUD, board */
+#s-sort{max-width:1040px}
+.shud{display:flex;justify-content:space-between;align-items:center;gap:8px;width:100%;margin-bottom:12px}
+.hearts{background:#fff;border:5px solid var(--ink);border-radius:30px;box-shadow:0 5px 0 var(--ink);padding:0 12px;font-size:24px;white-space:nowrap}
+.heart{display:inline-block}.heart.break{animation:hbreak .7s}
+@keyframes hbreak{30%{transform:scale(1.6) rotate(-15deg)}60%{transform:scale(.8) rotate(10deg)}}
+.sgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;width:100%}
+.sbin{cursor:pointer;text-align:center;background:rgba(255,255,255,.4);border:4px solid var(--ink);border-radius:16px;box-shadow:0 6px 0 var(--ink);padding:8px 6px}
+.sbin.over{transform:scale(1.04);filter:drop-shadow(0 0 8px var(--gold))}
+.sbin svg{display:block;width:100%;max-width:90px;margin:0 auto;overflow:visible}
+.sbin .lab{display:block;margin-top:6px;background:#fff;border:3px solid var(--ink);border-radius:10px;padding:2px 4px;box-shadow:0 3px 0 var(--ink);font-weight:700;font-size:clamp(12px,3vw,16px);line-height:1.1}
+.slot{display:flex;flex-direction:column;gap:6px;margin-top:10px;min-height:150px}
+.chip{touch-action:none;cursor:grab;display:flex;align-items:center;gap:6px;background:#fff;border:3px solid var(--ink);border-radius:10px;box-shadow:0 3px 0 var(--ink);padding:3px 6px;font-size:13px;font-weight:700;line-height:1.1;text-align:left}
+.chip b{flex:none;display:block;font-weight:400;font-size:26px}.chip b svg{display:block;height:28px;width:auto}
+.chip.sel{background:#fff3b0;transform:translateY(-3px)}.chip.drag{opacity:.35}
+/* Sort It Right: stage map */
+.banner{font:700 clamp(26px,7vw,40px) var(--font);color:#fff;background:linear-gradient(#ff8a8a 0 40%,var(--red) 41%);border:5px solid var(--ink);border-radius:14px;box-shadow:0 7px 0 var(--ink);padding:6px 30px;margin:8px 0 16px;letter-spacing:1px;text-shadow:-2px -2px 0 var(--ink),2px 2px 0 var(--ink),2px -2px 0 var(--ink),-2px 2px 0 var(--ink)}
+.map{position:relative;width:100%;max-width:520px;aspect-ratio:100/130;margin:0 auto 18px;background:radial-gradient(circle at 20% 20%,rgba(255,255,255,.18) 0 10%,transparent 11%) 0 0/60px 60px,linear-gradient(#9ee26a,#58b84a);border:5px solid var(--ink);border-radius:20px;box-shadow:0 8px 0 var(--ink)}
+.map svg{position:absolute;inset:0;width:100%;height:100%}
+.node{position:absolute;width:17%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;border:5px solid var(--ink);box-shadow:0 6px 0 var(--ink);cursor:pointer;padding:0;display:grid;place-items:center;font:700 clamp(20px,6vw,34px) var(--font);color:#fff;text-shadow:-2px -2px 0 var(--ink),2px 2px 0 var(--ink),2px -2px 0 var(--ink),-2px 2px 0 var(--ink);background:linear-gradient(#ffd96a 0 45%,var(--orange) 46%)}
+.node.done{background:linear-gradient(#7dff8f 0 45%,var(--green) 46%)}
+.node.lock{background:linear-gradient(#d9deea 0 45%,#8f98ad 46%);cursor:not-allowed;text-shadow:none}
+.node.cur{animation:nb .8s infinite alternate}
+.node:active:not(.lock){filter:brightness(.9)}
+@keyframes nb{to{transform:translate(-50%,-58%)}}
+@keyframes nshake{20%,60%{transform:translate(-60%,-50%)}40%,80%{transform:translate(-40%,-50%)}}
+.node.nshake{animation:nshake .4s}
+.nstars{position:absolute;bottom:-28px;left:50%;transform:translateX(-50%);font-style:normal;font-size:20px;letter-spacing:1px;white-space:nowrap;color:var(--gold);text-shadow:-1px -1px 0 var(--ink),1px 1px 0 var(--ink),1px -1px 0 var(--ink),-1px 1px 0 var(--ink)}
+.stars{font-size:48px;letter-spacing:4px;margin:6px 0;color:var(--gold);text-shadow:-2px -2px 0 var(--ink),2px 2px 0 var(--ink),2px -2px 0 var(--ink),-2px 2px 0 var(--ink)}
+@media (max-width:560px){.modes{grid-template-columns:1fr}.sgrid{grid-template-columns:repeat(2,1fr)}}
 @media (max-width:760px){
  .stage{grid-template-columns:1fr 92px;grid-template-areas:"side side" "mid next" "bins bins"}
  .side{flex-direction:row;flex-wrap:wrap}.side>*{flex:1}.mini{display:none}
@@ -116,15 +152,32 @@ input{font:700 24px var(--font);width:100%;max-width:340px;text-align:center;pad
 <div class="base"></div><div class="cloud c1"></div><div class="cloud c2"></div><div class="cloud c3"></div>
 <div class="xp" id="xp"><i id="xpbar"></i></div>
 
-<!-- Home -->
-<section class="screen on" id="s-home">
- <h1 style="margin-top:4vh">BIN IT RIGHT!</h1>
+<!-- Main menu -->
+<section class="screen on" id="s-menu">
+ <h1 style="margin-top:4vh">QUIZ IT RIGHT</h1>
+ <div class="panel"><button class="btn" id="mainPlay">PLAY</button></div>
+</section>
+
+<!-- Mode select -->
+<section class="screen" id="s-modes">
+ <h2>CHOOSE A MODE</h2>
+ <div class="modes">
+  <button class="mcard" id="cardQuiz"><span class="mi">❓</span><b>Quiz It Right</b><small>Sort items into the right bin. Beat the clock or go unlimited!</small></button>
+  <button class="mcard" id="cardSort"><span class="mi">🗂️</span><b>Sort It Right</b><small>Fix the mixed-up bins across 5 stages. Watch your lives!</small></button>
+ </div>
+ <button class="btn alt" id="modesBack">BACK</button>
+</section>
+
+<!-- Quiz It Right hub (the previous home screen, unchanged) -->
+<section class="screen" id="s-home">
+ <h1 style="margin-top:4vh">QUIZ IT RIGHT</h1>
  <div class="panel">
   <button class="btn" id="playQuiz">QUIZ MODE</button>
   <div class="cap">Sort 10 items as fast as you can!</div>
   <button class="btn or" id="playUnl">UNLIMITED MODE</button>
   <div class="cap">Endless items, 3 lives. Build a streak for x2, x3 points!</div>
   <button class="btn alt" id="lbHome">LEADERBOARD</button>
+  <button class="btn alt" id="hubBack">BACK</button>
  </div>
 </section>
 
@@ -187,6 +240,45 @@ input{font:700 24px var(--font);width:100%;max-width:340px;text-align:center;pad
  <div class="cap" id="bcap"></div>
 </section>
 
+<!-- Sort It Right: board -->
+<section class="screen" id="s-sort">
+ <div class="shud"><div class="pill" id="stg">STAGE 1</div><div class="hearts" id="hearts"></div><button class="btn sm alt" id="mapBtn">MAP</button></div>
+ <div class="sgrid" id="sgrid"></div>
+</section>
+
+<!-- Sort It Right: stage map -->
+<section class="screen" id="s-map">
+ <div class="banner">SORT IT RIGHT</div>
+ <div class="map" id="map">
+  <svg viewBox="0 0 100 130" preserveAspectRatio="none" aria-hidden="true">
+   <path d="M20 112 C45 118 75 108 68 92 S20 84 28 68 S80 58 72 44 S25 32 36 18" fill="none" stroke="#1b1f3b" stroke-width="9" stroke-linecap="round"/>
+   <path d="M20 112 C45 118 75 108 68 92 S20 84 28 68 S80 58 72 44 S25 32 36 18" fill="none" stroke="#f5e2a8" stroke-width="6" stroke-linecap="round"/>
+   <path d="M20 112 C45 118 75 108 68 92 S20 84 28 68 S80 58 72 44 S25 32 36 18" fill="none" stroke="#c99a4a" stroke-width="1.2" stroke-dasharray="2 3.5" stroke-linecap="round"/>
+  </svg>
+ </div>
+ <button class="btn alt" id="mapBack">BACK</button>
+</section>
+
+<!-- Sort It Right: game over, victory, stage-clear popup -->
+<section class="screen" id="s-over">
+ <h2>GAME OVER</h2>
+ <div class="panel">
+  <p style="font-size:22px;margin-top:0">You ran out of lives!</p><div style="font-size:56px">💔</div>
+  <button class="btn" id="retry">RETRY</button><button class="btn alt" id="overMenu">BACK TO MENU</button>
+ </div>
+</section>
+<section class="screen" id="s-win">
+ <h2>VICTORY!</h2>
+ <div class="panel">
+  <div class="stars" id="winStars"></div><p style="font-size:22px">All 5 stages cleared!</p>
+  <button class="btn" id="winAgain">PLAY AGAIN</button><button class="btn alt" id="winMenu">BACK TO MENU</button>
+ </div>
+</section>
+<div class="modal" id="pop"><div class="panel">
+ <h2 id="popTitle">STAGE CLEAR!</h2><div class="stars" id="popStars"></div>
+ <button class="btn" id="popNext">NEXT STAGE</button>
+</div></div>
+
 <!-- Admin -->
 <button class="adminBtn" id="adminBtn" aria-label="Admin">⚙</button>
 <div class="modal" id="adm"><div class="panel">
@@ -208,6 +300,7 @@ input{font:700 24px var(--font);width:100%;max-width:340px;text-align:center;pad
 <script>
 (function(){
 "use strict";
+var MAX_LIVES=3; // Sort It Right: lives for the whole run (shared across all 5 stages)
 var $=function(s){return document.querySelector(s)};
 
 /* ---- data: 4 bins, 10 items ---- */
@@ -261,7 +354,7 @@ function sortBoard(a){return a.sort(function(x,y){return y.score-x.score||x.time
 function show(id){
  document.querySelectorAll(".screen").forEach(function(s){s.classList.toggle("on",s.id===id)});
  $("#xp").classList.toggle("on",id==="s-game"&&S.gm==="quiz");
- $("#adminBtn").style.display=id==="s-game"?"none":"block";scrollTo(0,0);
+ $("#adminBtn").style.display=(id==="s-game"||id==="s-sort")?"none":"block";scrollTo(0,0);
 }
 function shuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t}return a}
 function fmt(n){return n>=1000?(n/1000).toFixed(1)+"k":n}
@@ -457,6 +550,150 @@ function admTry(){
  else $("#admErr").textContent="Wrong password.";
 }
 
+/* ================= Sort It Right ================= */
+var DIFF={"Drinking glass":2}; // clarity of existing items: 1 clear-cut, 2 medium, 3 tricky (default 1)
+// Extra items for the Sort It Right pool only (Quiz It Right keeps its own 10); same format plus d
+var EXTRA=[
+ {n:"Magazine",e:"📖",b:"blue",d:1,h:"Magazines are paper – blue bin!"},
+ {n:"Envelope",e:"✉️",b:"blue",d:1,h:"Envelopes are paper – blue bin!"},
+ {n:"Book",e:"📚",b:"blue",d:2,h:"Books are paper – blue bin!"},
+ {n:"Egg carton",e:"🥚",b:"blue",d:2,h:"Cardboard egg cartons are paper – blue bin!"},
+ {n:"Cardboard tube",e:"📜",b:"blue",d:3,h:"Cardboard tubes are paper – blue bin!"},
+ {n:"Yoghurt tub",e:"🥣",b:"orange",d:2,h:"Plastic tubs go in the orange bin!"},
+ {n:"Plastic bag",e:"🛍️",b:"orange",d:2,h:"Clean plastic bags go in the orange bin!"},
+ {n:"Aluminium foil",e:"🌯",b:"orange",d:3,h:"Foil is aluminium – orange bin!"},
+ {n:"Metal bottle cap",e:"🔘",b:"orange",d:3,h:"Metal caps go in the orange bin!"},
+ {n:"Jam jar",e:"🍯",b:"brown",d:1,h:"Glass jars go in the brown bin!"},
+ {n:"Glass medicine bottle",e:"💊",b:"brown",d:3,h:"Glass bottles go in the brown bin!"},
+ {n:"Cigarette butt",e:"🚬",b:"black",d:1,h:"Cigarette butts can’t be recycled – black bin!"},
+ {n:"Used tissue",e:"🤧",b:"black",d:2,h:"Used tissues are too soiled to recycle – black bin!"},
+ {n:"Crisp packet",e:"🍟",b:"black",d:2,h:"Foil-lined packets can’t be recycled – black bin!"},
+ {n:"Greasy pizza box",e:"🍕",b:"black",d:3,h:"Greasy cardboard can’t be recycled – black bin!"},
+ {n:"Coffee cup",e:"☕",b:"black",d:3,h:"Plastic-lined cups can’t be recycled – black bin!"},
+ {n:"Light bulb",e:"💡",b:"black",d:3,h:"Light bulbs aren’t recyclable glass – black bin!"},
+ {n:"Shiny wrapping paper",e:"🎁",b:"black",d:3,h:"Coated wrapping paper can’t be recycled – black bin!"}
+];
+var POOL=ITEMS.map(function(x){return{n:x.n,e:x.e,b:x.b,h:x.h,d:DIFF[x.n]||1}}).concat(EXTRA);
+// per stage: difficulty of misplaced items, max difficulty of all items, number misplaced
+var BAND=[[1],[1],[2],[2,3],[3]],MAXD=[1,1,2,3,3],MIS=[2,2,3,3,3];
+var NODES=[[20,112],[68,92],[28,68],[72,44],[36,18]]; // map node positions (x, y in a 100x130 box)
+/* Progress and lives live in this object only (no storage) */
+var ST={lives:MAX_LIVES,unlocked:1,stars:[0,0,0,0,0],stage:1,items:[],sel:null,on:false};
+function resetRun(){ST.lives=MAX_LIVES;ST.unlocked=1;ST.stars=[0,0,0,0,0]}
+function starStr(n){return"★".repeat(n)+"☆".repeat(3-n)}
+
+/* Build 12 items (3 per bin). Pick k bins, take one item from each, then rotate those items to the next
+   chosen bin: every bin keeps 3 items and no misplaced item starts in its own bin. */
+function buildStage(n){
+ var keys=Object.keys(BINS),band=BAND[n-1],maxd=MAXD[n-1],k=MIS[n-1],items=[];
+ var cand=shuffle(keys.filter(function(b){return POOL.some(function(x){return x.b===b&&band.indexOf(x.d)>-1})})).slice(0,k);
+ var mis=cand.map(function(b){var p=POOL.filter(function(x){return x.b===b&&band.indexOf(x.d)>-1});return p[Math.floor(Math.random()*p.length)]});
+ keys.forEach(function(b){
+  var ci=cand.indexOf(b),own=ci>-1?[mis[ci]]:[];
+  var rest=shuffle(POOL.filter(function(x){return x.b===b&&x.d<=maxd&&own.indexOf(x)<0}));
+  own.concat(rest).slice(0,3).forEach(function(x){items.push({n:x.n,e:x.e,b:x.b,h:x.h,at:b})});
+ });
+ mis.forEach(function(m,i){items.forEach(function(x){if(x.n===m.n)x.at=cand[(i+1)%k]})});
+ return shuffle(items);
+}
+function shud(broke){
+ var h="";for(var i=0;i<MAX_LIVES;i++)h+='<span class="heart'+(broke&&i===ST.lives?" break":"")+'">'+(i<ST.lives?"❤️":"💔")+'</span>';
+ $("#hearts").innerHTML=h;
+}
+function renderSort(animId,cls){
+ Object.keys(BINS).forEach(function(k){
+  var slot=$("#slot-"+k);slot.innerHTML="";
+  ST.items.filter(function(x){return x.at===k}).forEach(function(x){
+   var c=document.createElement("div");c.className="chip"+(x===ST.sel?" sel":"");c.innerHTML="<b>"+x.e+"</b><span>"+x.n+"</span>";
+   wireChip(c,x);slot.appendChild(c);if(x.n===animId)anim(c,cls);
+  });
+ });
+}
+/* drag (mouse + touch) or tap-to-select on a chip */
+function wireChip(el,item){
+ el.addEventListener("click",function(e){e.stopPropagation()});
+ el.addEventListener("pointerdown",function(e){
+  e.preventDefault();if(!ST.on)return;
+  var sx=e.clientX,sy=e.clientY,ghost=null,moved=false;
+  try{el.setPointerCapture(e.pointerId)}catch(_){}
+  function binAt(x,y){var t=document.elementFromPoint(x,y);return t&&t.closest?t.closest(".sbin"):null}
+  function mv(ev){
+   if(!moved&&Math.hypot(ev.clientX-sx,ev.clientY-sy)<8)return;
+   if(!moved){moved=true;ghost=el.cloneNode(true);ghost.className="chip ghost";document.body.appendChild(ghost);el.classList.add("drag")}
+   ghost.style.left=ev.clientX+"px";ghost.style.top=ev.clientY+"px";
+   var b=binAt(ev.clientX,ev.clientY);document.querySelectorAll(".sbin").forEach(function(x){x.classList.toggle("over",x===b)});
+  }
+  function up(ev){
+   el.removeEventListener("pointermove",mv);el.removeEventListener("pointerup",up);el.removeEventListener("pointercancel",up);
+   document.querySelectorAll(".sbin").forEach(function(x){x.classList.remove("over")});
+   if(!moved){ST.sel=ST.sel===item?null:item;renderSort();return}
+   var b=binAt(ev.clientX,ev.clientY);ghost.remove();el.classList.remove("drag");
+   if(b&&ev.type==="pointerup")place(item,b.dataset.bin);
+  }
+  el.addEventListener("pointermove",mv);el.addEventListener("pointerup",up);el.addEventListener("pointercancel",up);
+ });
+}
+/* Correct bin: snap in. Any other bin: lose exactly 1 life, chip shakes and stays put. */
+function place(item,k){
+ if(!ST.on||item.at===k)return;
+ var binEl=document.querySelector('.sbin[data-bin="'+k+'"]');
+ if(k===item.b){
+  item.at=k;ST.sel=null;renderSort(item.n,"bounce");anim(binEl,"bounce");pop(binEl,"✔","#7dff8f");
+  if(ST.items.every(function(x){return x.at===x.b}))clearStage();
+ }else{
+  ST.sel=null;renderSort(item.n,"shake");pop(binEl,"💔","#ff8a8a");
+  ST.lives--;shud(true);
+  if(ST.lives<=0){ST.on=false;setTimeout(function(){show("s-over")},900)}
+ }
+}
+/* Stars = lives left (scaled to MAX_LIVES). Stages 1-4 show a popup; stage 5 shows Victory. */
+function clearStage(){
+ ST.on=false;
+ var n=ST.stage,st=Math.max(1,Math.round(3*ST.lives/MAX_LIVES));
+ ST.stars[n-1]=Math.max(ST.stars[n-1],st);ST.unlocked=Math.max(ST.unlocked,Math.min(5,n+1));
+ if(n===5){$("#winStars").textContent=starStr(st);setTimeout(function(){show("s-win");confetti()},600)}
+ else{$("#popTitle").textContent="STAGE "+n+" CLEAR!";$("#popStars").textContent=starStr(st);setTimeout(function(){$("#pop").classList.add("on")},600)}
+}
+function startStage(n){
+ ST.stage=n;ST.items=buildStage(n);ST.sel=null;ST.on=true;
+ $("#stg").textContent="STAGE "+n;shud(false);renderSort();show("s-sort");
+}
+function openMap(){
+ ST.on=false;
+ var m=$("#map");m.querySelectorAll(".node").forEach(function(x){x.remove()});
+ NODES.forEach(function(p,i){
+  var n=i+1,locked=n>ST.unlocked,done=ST.stars[i]>0,b=document.createElement("button");
+  b.className="node"+(locked?" lock":done?" done":" cur");
+  b.style.left=p[0]+"%";b.style.top=(p[1]/130*100)+"%";
+  b.innerHTML=(locked?"🔒":n)+(done?'<i class="nstars">'+starStr(ST.stars[i])+"</i>":"");
+  b.setAttribute("aria-label","Stage "+n+(locked?" (locked)":""));
+  b.onclick=function(){if(locked){anim(b,"nshake");return}startStage(n)};
+  m.appendChild(b);
+ });
+ show("s-map");
+}
+(function(){ // build the 4 bins once; each bin accepts drops and taps
+ var g=$("#sgrid");
+ Object.keys(BINS).forEach(function(k){
+  var d=document.createElement("div");d.className="sbin";d.dataset.bin=k;
+  d.innerHTML=binSVG(k)+'<span class="lab">'+BINS[k].label+'</span><div class="slot" id="slot-'+k+'"></div>';
+  d.addEventListener("click",function(){if(ST.sel&&ST.on)place(ST.sel,k)});
+  g.appendChild(d);
+ });
+})();
+$("#mainPlay").onclick=function(){show("s-modes")};
+$("#cardQuiz").onclick=function(){show("s-home")};
+$("#cardSort").onclick=openMap;
+$("#modesBack").onclick=function(){show("s-menu")};
+$("#hubBack").onclick=function(){show("s-modes")};
+$("#mapBack").onclick=function(){show("s-modes")};
+$("#mapBtn").onclick=openMap;
+$("#popNext").onclick=function(){$("#pop").classList.remove("on");openMap()};
+$("#retry").onclick=function(){resetRun();startStage(1)};
+$("#overMenu").onclick=function(){resetRun();show("s-menu")};
+$("#winAgain").onclick=function(){resetRun();openMap()};
+$("#winMenu").onclick=function(){resetRun();show("s-menu")};
+
 /* ---- wiring ---- */
 $("#playQuiz").onclick=function(){S.gm="quiz";toName()};
 $("#playUnl").onclick=function(){S.gm="unl";toName()};
@@ -484,4 +721,4 @@ $("#admClear").onclick=async function(){
 })();
 </script>
 </body>
-</html> 
+</html>
