@@ -264,13 +264,13 @@ input{font:700 24px var(--font);width:100%;max-width:340px;text-align:center;pad
  <h2>GAME OVER</h2>
  <div class="panel">
   <p style="font-size:22px;margin-top:0">You ran out of lives!</p><div style="font-size:56px">💔</div>
-  <button class="btn" id="retry">RETRY</button><button class="btn alt" id="overMenu">BACK TO MENU</button>
+  <button class="btn" id="retry">RETRY</button><button class="btn or" id="overMap">BACK</button><button class="btn alt" id="overMenu">BACK TO MENU</button>
  </div>
 </section>
 <section class="screen" id="s-win">
- <h2>VICTORY!</h2>
+ <h2>YOU WON!</h2>
  <div class="panel">
-  <div class="stars" id="winStars"></div><p style="font-size:22px">All 5 stages cleared!</p>
+  <div class="stars" id="winStars"></div><p style="font-size:22px">🎉 Congratulations! You cleared all 5 stages of Sort It Right!</p>
   <button class="btn" id="winAgain">PLAY AGAIN</button><button class="btn alt" id="winMenu">BACK TO MENU</button>
  </div>
 </section>
@@ -294,6 +294,10 @@ input{font:700 24px var(--font);width:100%;max-width:340px;text-align:center;pad
   <div id="admList"></div>
   <button class="btn sm red" id="admClear">CLEAR ALL SCORES</button><button class="btn sm alt" id="admX2">CLOSE</button>
   <div class="cap" id="admCap"></div>
+  <div style="border-top:3px solid var(--ink);margin-top:10px;padding-top:8px">
+   <div class="cap" id="admSort"></div>
+   <button class="btn sm red" id="admSortReset">RESET SORT IT RIGHT PROGRESS</button>
+  </div>
  </div>
 </div></div>
 
@@ -519,10 +523,15 @@ async function board(from,tab){
 }
 
 /* ---- admin (password checked in the page: a light lock only) ---- */
-var ADMIN_PW="12345",armed=false,admGm="quiz";
+var ADMIN_PW="12345",armed=false,armedSort=false,admGm="quiz";
 function admClose(){$("#adm").classList.remove("on")}
+async function admSortInfo(){
+ await sortReady;armedSort=false;$("#admSortReset").textContent="RESET SORT IT RIGHT PROGRESS";
+ var s=ST.stars.reduce(function(a,b){return a+b},0);
+ $("#admSort").textContent="Sort It Right: stage "+ST.unlocked+" unlocked, "+s+"/15 stars";
+}
 async function admList(){
- var data=sortBoard(await load(admGm)),box=$("#admList");box.innerHTML="";armed=false;$("#admClear").textContent="CLEAR ALL SCORES";
+ var data=sortBoard(await load(admGm)),box=$("#admList");box.innerHTML="";armed=false;$("#admClear").textContent="CLEAR ALL SCORES";admSortInfo();
  $("#admTQ").className="btn sm"+(admGm==="quiz"?"":" alt");$("#admTU").className="btn sm"+(admGm==="unl"?"":" alt");
  if(!data.length)box.innerHTML='<div class="cap">No scores yet.</div>';
  data.forEach(function(e){
@@ -569,7 +578,7 @@ var EXTRA=[
  {n:"Used tissue",e:"🤧",b:"black",d:2,h:"Used tissues are too soiled to recycle – black bin!"},
  {n:"Crisp packet",e:"🍟",b:"black",d:2,h:"Foil-lined packets can’t be recycled – black bin!"},
  {n:"Greasy pizza box",e:"🍕",b:"black",d:3,h:"Greasy cardboard can’t be recycled – black bin!"},
- {n:"Coffee cup",e:"☕",b:"black",d:3,h:"Plastic-lined cups can’t be recycled – black bin!"},
+ {n:"Ceramic plate",e:"🍽️",b:"black",d:3,h:"Ceramics can’t be recycled with glass – black bin!"},
  {n:"Light bulb",e:"💡",b:"black",d:3,h:"Light bulbs aren’t recyclable glass – black bin!"},
  {n:"Shiny wrapping paper",e:"🎁",b:"black",d:3,h:"Coated wrapping paper can’t be recycled – black bin!"}
 ];
@@ -579,7 +588,28 @@ var BAND=[[1],[1],[2],[2,3],[3]],MAXD=[1,1,2,3,3],MIS=[2,2,3,3,3];
 var NODES=[[20,112],[68,92],[28,68],[72,44],[36,18]]; // map node positions (x, y in a 100x130 box)
 /* Progress and lives live in this object only (no storage) */
 var ST={lives:MAX_LIVES,unlocked:1,stars:[0,0,0,0,0],stage:1,items:[],sel:null,on:false};
-function resetRun(){ST.lives=MAX_LIVES;ST.unlocked=1;ST.stars=[0,0,0,0,0]}
+function resetRun(){ST.lives=MAX_LIVES;ST.unlocked=1;ST.stars=[0,0,0,0,0];saveSort()}
+/* Sort It Right progress (unlocked stage + stars) is saved with the same storage as the leaderboards.
+   Lives are not saved: they refill each time the page is opened. */
+async function loadSort(){
+ var m=store(),raw=null;
+ try{
+  if(m==="shared"){var r=await window.storage.get("rr:sort",true);raw=r&&r.value}
+  else if(m==="local")raw=localStorage.getItem("rr:sort");else raw=memStore["rr:sort"];
+ }catch(e){raw=null}
+ try{
+  var d=JSON.parse(raw||"null");
+  if(d&&d.stars&&d.stars.length===5){ST.unlocked=Math.min(5,Math.max(1,d.unlocked|0));ST.stars=d.stars.map(function(s){return Math.min(3,Math.max(0,s|0))})}
+ }catch(e){}
+}
+async function saveSort(){
+ var m=store(),s=JSON.stringify({unlocked:ST.unlocked,stars:ST.stars});
+ try{
+  if(m==="shared")await window.storage.set("rr:sort",s,true);
+  else if(m==="local")localStorage.setItem("rr:sort",s);else memStore["rr:sort"]=s;
+ }catch(e){memStore["rr:sort"]=s}
+}
+var sortReady=loadSort(); // saved progress is applied before the map first opens
 function starStr(n){return"★".repeat(n)+"☆".repeat(3-n)}
 
 /* Build 12 items (3 per bin). Pick k bins, take one item from each, then rotate those items to the next
@@ -650,16 +680,17 @@ function place(item,k){
 function clearStage(){
  ST.on=false;
  var n=ST.stage,st=Math.max(1,Math.round(3*ST.lives/MAX_LIVES));
- ST.stars[n-1]=Math.max(ST.stars[n-1],st);ST.unlocked=Math.max(ST.unlocked,Math.min(5,n+1));
+ ST.stars[n-1]=Math.max(ST.stars[n-1],st);ST.unlocked=Math.max(ST.unlocked,Math.min(5,n+1));saveSort();
  if(n===5){$("#winStars").textContent=starStr(st);setTimeout(function(){show("s-win");confetti()},600)}
  else{$("#popTitle").textContent="STAGE "+n+" CLEAR!";$("#popStars").textContent=starStr(st);setTimeout(function(){$("#pop").classList.add("on")},600)}
 }
 function startStage(n){
+ ST.lives=MAX_LIVES; // every new stage starts with full lives
  ST.stage=n;ST.items=buildStage(n);ST.sel=null;ST.on=true;
  $("#stg").textContent="STAGE "+n;shud(false);renderSort();show("s-sort");
 }
-function openMap(){
- ST.on=false;
+async function openMap(){
+ ST.on=false;await sortReady;
  var m=$("#map");m.querySelectorAll(".node").forEach(function(x){x.remove()});
  NODES.forEach(function(p,i){
   var n=i+1,locked=n>ST.unlocked,done=ST.stars[i]>0,b=document.createElement("button");
@@ -689,10 +720,11 @@ $("#hubBack").onclick=function(){show("s-modes")};
 $("#mapBack").onclick=function(){show("s-modes")};
 $("#mapBtn").onclick=openMap;
 $("#popNext").onclick=function(){$("#pop").classList.remove("on");openMap()};
-$("#retry").onclick=function(){resetRun();startStage(1)};
-$("#overMenu").onclick=function(){resetRun();show("s-menu")};
+$("#retry").onclick=function(){ST.lives=MAX_LIVES;startStage(ST.stage)}; // retry the stage you lost, progress kept
+$("#overMap").onclick=function(){ST.lives=MAX_LIVES;openMap()}; // back to the Sort It Right map, lives refilled
+$("#overMenu").onclick=function(){ST.lives=MAX_LIVES;show("s-menu")}; // progress kept, lives refilled
 $("#winAgain").onclick=function(){resetRun();openMap()};
-$("#winMenu").onclick=function(){resetRun();show("s-menu")};
+$("#winMenu").onclick=function(){ST.lives=MAX_LIVES;show("s-menu")};
 
 /* ---- wiring ---- */
 $("#playQuiz").onclick=function(){S.gm="quiz";toName()};
@@ -714,6 +746,10 @@ $("#admPw").addEventListener("keydown",function(e){if(e.key==="Enter")admTry()})
 $("#admX1").onclick=admClose;$("#admX2").onclick=admClose;
 $("#admTQ").onclick=function(){admGm="quiz";admList()};
 $("#admTU").onclick=function(){admGm="unl";admList()};
+$("#admSortReset").onclick=function(){ // two taps to confirm, then wipe saved Sort It Right progress
+ if(!armedSort){armedSort=true;this.textContent="TAP AGAIN TO CONFIRM";return}
+ resetRun();admSortInfo();
+};
 $("#admClear").onclick=async function(){
  if(!armed){armed=true;this.textContent="TAP AGAIN TO CONFIRM";return}
  await save(admGm,[]);admList();
