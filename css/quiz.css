@@ -1,0 +1,64 @@
+/* Quiz It Right: game stage, bins, items, results, leaderboards */
+/* game layout, following the sketch: stats + leaderboard left, item centre, "Next" right, bins along the bottom */
+.stage{display:grid;width:100%;gap:14px;grid-template-columns:210px 1fr 130px;grid-template-areas:"side mid next" "side bins bins"}
+.side{grid-area:side;display:flex;flex-direction:column;gap:12px}
+.mid{grid-area:mid;text-align:center}
+.next{grid-area:next;text-align:center;font-weight:700;font-size:22px;color:#fff;text-shadow:-2px -2px 0 var(--ink),2px 2px 0 var(--ink),2px -2px 0 var(--ink),-2px 2px 0 var(--ink)}
+.pill,.scorebox,.lives,.mini{background:#fff;border:5px solid var(--ink);box-shadow:0 6px 0 var(--ink);text-align:center;font-weight:700}
+.pill{font-size:24px;border-radius:30px;padding:2px 12px}
+.scorebox{border-radius:14px;padding:6px}
+.scorebox b{display:block;font-size:44px;line-height:1.1}
+.scorebox span{display:inline-block;border:3px solid var(--ink);border-radius:14px;padding:0 14px;background:#fff3b0}
+.lives{border-radius:14px;padding:4px;font-size:20px;display:none}
+.mini{border-radius:14px;overflow:hidden}
+.mini h3{margin:0;padding:4px;background:var(--gold);border-bottom:4px solid var(--ink);font-size:18px}
+.mini .list{border:0;border-radius:0;box-shadow:none;margin:0;max-height:300px;overflow:auto}
+.hint{min-height:34px;font-weight:700;font-size:17px;background:#fff3b0;border:4px solid var(--ink);border-radius:12px;padding:4px 10px;margin:0 auto 8px;opacity:0;transition:opacity .2s}
+.hint.show{opacity:1}
+.cname{font:700 clamp(22px,5vw,32px) var(--font);color:#fff;margin:4px 0 8px;text-shadow:-2px -2px 0 var(--ink),2px 2px 0 var(--ink),2px -2px 0 var(--ink),-2px 2px 0 var(--ink),0 4px 0 var(--ink)}
+.item{touch-action:none;cursor:grab;background:#fff;border:4px solid var(--ink);border-radius:14px;box-shadow:0 5px 0 var(--ink);padding:8px;text-align:center}
+.item b{display:block;font-weight:400;font-size:44px;line-height:1.1}
+.item b svg,.nextc b svg{display:block;margin:0 auto;height:46px;width:auto}
+#cur{width:min(180px,100%);margin:0 auto}
+#cur b{font-size:clamp(60px,16vw,96px)}
+#cur b svg{height:clamp(64px,16vw,96px)}
+.item.sel{background:#fff3b0;transform:translateY(-4px);box-shadow:0 9px 0 var(--ink)}
+.item.drag{opacity:.35}
+.ghost{position:fixed;z-index:50;pointer-events:none;width:100px;transform:translate(-50%,-50%) scale(1.1) rotate(-5deg)}
+.pin{animation:pin .25s}
+@keyframes pin{from{transform:scale(.6)}}
+.nextc{width:clamp(76px,12vw,110px);aspect-ratio:1;border-radius:50%;margin:0 auto 6px;background:#fff;border:5px solid var(--ink);box-shadow:0 6px 0 var(--ink);display:grid;place-items:center}
+.nextc b{font-weight:400;font-size:clamp(34px,6vw,52px)}
+/* bins drawn as SVG bin shapes with a label plate */
+.bins{grid-area:bins;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;align-items:end}
+.bin{cursor:pointer;text-align:center;font-weight:700;font-size:clamp(11px,3.3vw,18px);line-height:1.1;position:relative}
+.bin svg{display:block;width:100%;max-width:130px;margin:0 auto;overflow:visible}
+.bin span{display:block;margin-top:6px;background:#fff;border:3px solid var(--ink);border-radius:10px;padding:2px 4px;box-shadow:0 3px 0 var(--ink)}
+.bin.over{transform:scale(1.08);filter:drop-shadow(0 0 8px var(--gold))}
+.bounce{animation:bounce .5s}.shake{animation:shake .45s}
+@keyframes bounce{30%{transform:translateY(-18px) scale(1.06)}60%{transform:translateY(0) scale(.97)}}
+@keyframes shake{20%,60%{transform:translateX(-10px)}40%,80%{transform:translateX(10px)}}
+.pop{position:fixed;z-index:60;pointer-events:none;font:700 28px var(--font);color:var(--gold);text-shadow:-2px -2px 0 var(--ink),2px 2px 0 var(--ink),2px -2px 0 var(--ink),-2px 2px 0 var(--ink);animation:pop .9s forwards}
+@keyframes pop{to{transform:translateY(-70px) scale(1.3);opacity:0}}
+/* results + leaderboards */
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
+.stat{background:#eaf6ff;border:4px solid var(--ink);border-radius:12px;padding:8px}
+.stat span{display:block;font-size:14px;opacity:.7}.stat b{font-size:28px}
+.rank{font-size:22px;font-weight:700;margin:8px 0}
+.tabs{display:flex;gap:6px;margin-bottom:12px}
+.list{width:100%;border:5px solid var(--ink);border-radius:16px;background:#fff;box-shadow:0 8px 0 var(--ink);overflow:hidden;margin-bottom:14px}
+.row{display:grid;grid-template-columns:44px 1fr auto auto;gap:8px;align-items:center;padding:6px 10px;color:var(--ink);font-size:18px;border-bottom:2px solid #e3e8f2}
+.row.c{grid-template-columns:34px 1fr auto;font-size:15px;padding:4px 6px}
+.row.me{background:linear-gradient(#ffe36a,#ffc81e);font-weight:700}
+.row .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left}
+.rk{font-weight:700;color:#000;text-align:center}
+.rk svg{display:block;margin:0 auto;height:38px;width:auto}.c .rk svg{height:28px}
+.empty{padding:22px;color:var(--ink)}
+.conf{position:fixed;z-index:70;top:-20px;width:10px;height:14px;pointer-events:none;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(105vh) rotate(720deg)}}
+@media (max-width:760px){
+ .stage{grid-template-columns:1fr 92px;grid-template-areas:"side side" "mid next" "bins bins"}
+ .side{flex-direction:row;flex-wrap:wrap}.side>*{flex:1}.mini{display:none}
+ .pill{font-size:20px}.scorebox b{font-size:34px}
+}
+@media (max-width:420px){.row{font-size:15px}.btn{font-size:19px;padding:10px 18px}}
