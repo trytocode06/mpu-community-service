@@ -18,6 +18,7 @@ $("#winMenu").onclick=function(){ST.lives=MAX_LIVES;show("s-menu")};
 /* ---- wiring ---- */
 $("#playQuiz").onclick=function(){S.gm="quiz";toName()};
 $("#playUnl").onclick=function(){S.gm="unl";toName()};
+$("#quitBtn").onclick=quitRound;
 $("#lbHome").onclick=function(){board("s-home","quiz")};
 $("#backName").onclick=function(){show("s-home")};
 $("#play").onclick=start;

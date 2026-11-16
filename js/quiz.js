@@ -38,6 +38,8 @@ function hud(){
  $("#lifeBox").textContent=new Array(S.lives+1).join("❤️")+new Array(4-S.lives).join("🖤")+"  🔥 x"+mult();
 }
 function select(v){S.sel=v;$("#cur").classList.toggle("sel",v)}
+/* BACK during a round: stop the clock and return to the Quiz It Right menu. Nothing is saved. */
+function quitRound(){S.over=true;clearInterval(S.tick);select(false);$("#hint").classList.remove("show");show("s-home")}
 
 /* Called once per drop (drag or tap). Quiz: 10/15/20/25 streak ladder, -5 wrong.
    Unlimited: 10 x multiplier, wrong = lose a life + streak reset. */
